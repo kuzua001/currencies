@@ -1,0 +1,7 @@
+refresh_period: 3600
+cache_prefix: currencies_
+supported_currencies:
+  - RUB
+  - JPY
+  - USD
+  - EUR
