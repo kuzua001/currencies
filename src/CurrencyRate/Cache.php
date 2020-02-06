@@ -32,7 +32,7 @@ class Cache implements CurrenciesRatesRepositoryInterface
 
         if ($expiresAt > $timestamp) {
             $rateValue = (float)$this->cache->get($key);
-            $rate = new CurrencyRate($pair);
+            $rate = new CurrencyRate($pair, $expiresAt);
             $rate->setRate($rateValue);
 
             return $rate;
@@ -44,8 +44,10 @@ class Cache implements CurrenciesRatesRepositoryInterface
     public function setCurrencyRate(CurrencyRateInterface $rate, int $expiresAt): bool
     {
         $key = $this->formatKey($rate->getPair());
-        $ttl = $rate->getExpiresAt() - $expiresAt;
+        $ttl = $expiresAt - time();
         $this->cache->set($key, $rate->getRate(), $ttl);
+
+        return true;
     }
 
     private function formatKey(CurrencyPair $pair)
