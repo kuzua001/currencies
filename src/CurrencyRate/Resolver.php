@@ -10,7 +10,6 @@ use App\Model\CurrenciesConfigInterface;
 use App\Model\CurrencyPair;
 use App\Model\CurrencyRate;
 use App\Model\CurrencyRateInterface;
-use App\Service\Cache;
 use App\Service\CacheInterface;
 use App\Service\CurrenciesRatesApiInterface;
 use App\Service\CurrenciesRatesRepositoryInterface;

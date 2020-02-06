@@ -49,17 +49,17 @@ class CurrenciesConfigAccessor implements CurrenciesConfigInterface
         return $this->config[static::NODE_SUPPORTED_CURRENCIES] ?? static::NODE_SUPPORTED_CURRENCIES_DEFAULT;
     }
 
-    protected function readConfigData()
+    protected function getConfigFilename(): string
+    {
+        return realpath(__DIR__ . '/../../config/currencies.yaml');
+    }
+
+    private function readConfigData()
     {
         return Yaml::parseFile($this->getConfigFilename());
     }
 
     private function __construct()
     {
-    }
-
-    private function getConfigFilename(): string
-    {
-        return realpath(__DIR__ . '/../../config/currencies.yaml');
     }
 }

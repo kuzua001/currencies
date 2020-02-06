@@ -12,7 +12,5 @@ interface CacheInterface
 
     public function set(string $key, $value, ?int $ttl = null);
 
-    public function has(string $key);
-
-    public function expiresAt(string $key): ?int;
+    public function expiresAt(string $key): int;
 }

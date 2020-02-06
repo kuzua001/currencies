@@ -21,6 +21,7 @@ class Cache implements CurrenciesRatesRepositoryInterface
 
     public function __construct(CacheInterface $cache, string $prefix)
     {
+        $this->cache = $cache;
         $this->prefix = $prefix;
     }
 
