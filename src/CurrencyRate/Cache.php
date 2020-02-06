@@ -3,12 +3,13 @@
  * Copyright © 2020. Ivan Kuznetsov
  */
 
-namespace App\Service;
-
+namespace App\CurrencyRate;
 
 use App\Model\CurrencyPair;
 use App\Model\CurrencyRate;
 use App\Model\CurrencyRateInterface;
+use App\Service\CacheInterface;
+use App\Service\CurrenciesRatesRepositoryInterface;
 
 class Cache implements CurrenciesRatesRepositoryInterface
 {
