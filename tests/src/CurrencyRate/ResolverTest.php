@@ -10,6 +10,8 @@ use App\CurrencyRate\Resolver;
 use App\Model\CurrenciesConfigAccessor;
 use App\Model\CurrencyPair;
 use App\Model\CurrencyRate;
+use App\Model\Exception\CurrencyIsNotSupported;
+use App\Model\Exception\CurrencyRateIsNotFound;
 use App\Service\CacheInterface;
 use App\Service\CurrenciesRatesApiInterface;
 use Mocks\Cache;
@@ -19,17 +21,56 @@ class ResolverTest extends TestCase
 {
     private $source = null;
 
-    public function testGetRate()
+    public function ratesDataProvider()
     {
-        $expectedRate = 70;
-
-        $apiRates = [
-            'USD' => [
-                'value' => $expectedRate,
-                'ttl' => 1,
-                'base' => 'RUB'
+        return [
+            'supported_currency' => [
+                'api_rates' => [
+                    'USD' => [
+                        'value' => 70,
+                        'ttl' => 1,
+                        'base' => 'RUB'
+                    ]
+                ],
+                'code' => 'USD',
+                'expected_exception' => false
+            ],
+            'not_supported_currency_present_in_api' => [
+                'api_rates' => [
+                    'USD' => [
+                        'value' => 70,
+                        'ttl' => 1,
+                        'base' => 'RUB'
+                    ],
+                    'PHP' => [
+                        'value' => 200,
+                        'ttl' => 1,
+                        'base' => 'RUB'
+                    ]
+                ],
+                'code' => 'PHP',
+                'expected_exception' => CurrencyIsNotSupported::class
+            ],
+            'supported_currency_not_found' => [
+                'api_rates' => [
+                    'RUB' => [
+                        'value' => 1,
+                        'ttl' => 1,
+                        'base' => 'RUB'
+                    ]
+                ],
+                'code' => 'USD',
+                'expected_exception' => CurrencyRateIsNotFound::class
             ]
         ];
+    }
+
+    /** @dataProvider ratesDataProvider */
+    public function testGetRate($apiRates, $code, $expectedException)
+    {
+        if ($expectedException) {
+            $this->expectException($expectedException);
+        }
 
         $config = $this->createConfig('currencies');
         $api = $this->createApi($apiRates);
@@ -38,12 +79,14 @@ class ResolverTest extends TestCase
 
         $resolver = new Resolver($config, $cache, $database, $api);
         $pair = new CurrencyPair();
-        $pair->code = 'USD';
+        $pair->code = $code;
         $pair->baseCurrencyCode = 'RUB';
 
         $rate = $resolver->getRate($pair);
 
-        $this->assertEquals($expectedRate, $rate->getRate());
+        if (!$expectedException) {
+            $this->assertEquals($apiRates[$code]['value'], $rate->getRate());
+        }
     }
 
     private function createCache()
@@ -93,7 +136,6 @@ class ResolverTest extends TestCase
     {
         $configMock = $this->getMockBuilder(CurrenciesConfigAccessor::class)
             ->onlyMethods(['getConfigFilename'])
-            ->disableOriginalConstructor()
             ->getMock();
         $configMock->method('getConfigFilename')
             ->willReturn($this->getConfigPath($configName . '.yaml'));
@@ -113,6 +155,6 @@ class ResolverTest extends TestCase
 
     private function getConfigPath($fileName)
     {
-        return __DIR__ . '/../../providers/' . $fileName;
+        return realpath(__DIR__ . '/../../providers/' . $fileName);
     }
 }

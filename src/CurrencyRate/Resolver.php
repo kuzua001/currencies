@@ -10,12 +10,17 @@ use App\Model\CurrenciesConfigInterface;
 use App\Model\CurrencyPair;
 use App\Model\CurrencyRate;
 use App\Model\CurrencyRateInterface;
+use App\Model\Exception\CurrencyIsNotSupported;
+use App\Model\Exception\CurrencyRateIsNotFound;
 use App\Service\CacheInterface;
 use App\Service\CurrenciesRatesApiInterface;
 use App\Service\CurrenciesRatesRepositoryInterface;
 
 class Resolver
 {
+    /** @var CurrenciesConfigInterface */
+    private $config;
+
     /** @var CurrenciesRatesRepositoryInterface[] */
     private $sourcecs;
 
@@ -26,6 +31,7 @@ class Resolver
         CurrenciesRatesApiInterface $api
     )
     {
+        $this->config = $config;
         $this->sourcecs = [
             new Cache($cache, $config->getCachePrefix()),
             $database,
@@ -33,8 +39,24 @@ class Resolver
         ];
     }
 
+    /**
+     * @param CurrencyPair $pair
+     * @return CurrencyRateInterface|null
+     * @throws CurrencyIsNotSupported
+     * @throws CurrencyRateIsNotFound
+     */
     public function getRate(CurrencyPair $pair): ?CurrencyRateInterface
     {
+        $supportedCurrencies = $this->config->getSupportedCurrencies();
+
+        if (!isset($supportedCurrencies[$pair->code])) {
+            throw new CurrencyIsNotSupported($pair->code);
+        }
+
+        if (!isset($supportedCurrencies[$pair->baseCurrencyCode])) {
+            throw new CurrencyIsNotSupported($pair->baseCurrencyCode);
+        }
+
         $timestamp = time();
         /** @var CurrenciesRatesRepositoryInterface[] $outdatedSources */
         $outdatedSources = [];
@@ -50,7 +72,7 @@ class Resolver
         }
 
         if ($rate === null) {
-            return null;
+            throw new CurrencyRateIsNotFound($pair);
         }
 
         foreach ($outdatedSources as $source) {
