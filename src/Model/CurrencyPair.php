@@ -8,7 +8,7 @@ namespace App\Model;
 
 class CurrencyPair
 {
-   public $code;
+    public $code;
 
-   public $baseCurrencyCode;
+    public $baseCurrencyCode;
 }

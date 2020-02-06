@@ -12,6 +12,8 @@ class CurrencyRateIsNotFound extends \Exception
 {
     public function __construct(CurrencyPair $pair)
     {
-        parent::__construct(sprintf('Currency rate "%s" to "%s" is not found.', $pair->code, $pair->baseCurrencyCode));
+        parent::__construct(sprintf(
+            'Currency rate "%s" to "%s" is not found.', $pair->code, $pair->baseCurrencyCode
+        ));
     }
 }

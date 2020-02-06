@@ -97,18 +97,18 @@ class ResolverTest extends TestCase
     private function createApi($rateItems)
     {
         $apiMock = $this->getMockBuilder(CurrenciesRatesApiInterface::class)
-            ->onlyMethods(['getCurrencyRate','setCurrencyRate'])
+            ->onlyMethods(['getCurrencyRate', 'setCurrencyRate'])
             ->getMock();
 
         $apiMock->method('getCurrencyRate')
-            ->will($this->returnCallback(function() {
+            ->will($this->returnCallback(function () {
                 $source = $this->getCommonSource();
                 $apiSource = new \App\CurrencyRate\Cache($source, 'api');
                 $args = func_get_args();
                 return $apiSource->getCurrencyRate(...$args);
             }));
         $apiMock->method('setCurrencyRate')
-            ->will($this->returnCallback(function() {
+            ->will($this->returnCallback(function () {
                 $source = $this->getCommonSource();
                 $apiSource = new \App\CurrencyRate\Cache($source, 'api');
                 $args = func_get_args();
@@ -143,7 +143,7 @@ class ResolverTest extends TestCase
         return $configMock;
     }
 
-    private  function getCommonSource(): CacheInterface
+    private function getCommonSource(): CacheInterface
     {
         if ($this->source === null) {
             $source = new Cache();
